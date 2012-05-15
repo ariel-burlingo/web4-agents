@@ -13,10 +13,14 @@ public class Field {
 	//private int recursionDeep;
 	//private Field parentBlock = null;
 	//private Position relativePos = Position.TOP;
-	public boolean obstacle = false;
+	private boolean obstacle;
 
+	public Field(){
+		this.obstacle = false;
+	}
+	
 	public Field(boolean obstacle) {
-		this.setObstacle(obstacle);
+		this.obstacle = obstacle;
 		//this.recursionDeep = recursion;	
 	}
 	
@@ -25,7 +29,7 @@ public class Field {
 		return obstacle;
 	}
 
-	private void setObstacle(boolean obstacle) {
+	public void setObstacle(boolean obstacle) {
 		this.obstacle = obstacle;
 	}
 

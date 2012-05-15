@@ -67,6 +67,7 @@ public class Sandbox {
             
             // Parsing map
             System.out.println("Loading maze");
+            System.out.println(" x = " + width +"y=" + height);
             int i=0; // i = current line
             while ((strLine = br.readLine()) != null) {
             	int characterIdx = 0;

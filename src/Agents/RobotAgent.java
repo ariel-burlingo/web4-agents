@@ -28,10 +28,63 @@ public class RobotAgent extends Agent {
 
    private static final long serialVersionUID = 1L;
    public Sandbox mapa;
-   public Field OurMap[][]; //= new Field[mapa.getWidth()][mapa.getHeight()];
+   public Field OurMap[][];// = new Field[mapa.getWidth()][mapa.getHeight()];
    public int x=0;
    public int y=0;
    
+   public boolean isDeadEnd(){
+	   try{
+		   if(OurMap[x+1][y].isObstacle() 
+				   && OurMap[x-1][y].isObstacle()
+				   && OurMap[x][y+1].isObstacle()
+				   && OurMap[x][y-1].isObstacle()
+				   ){
+			   	return true;
+			   }
+		   } catch(Exception e){
+			   return false;
+		   }
+	   return false;
+   }
+   
+   public boolean canMove(int posX, int posY){
+	   try{
+		   if(mapa.map[posX][posY].isObstacle()){
+			   System.out.println("Obstacle @ " + posX + ":" + posY);
+			   return false;
+		   } else {
+			   System.out.println("Free @ " + posX + ":" + posY);
+			   return true;
+		   }
+	   } catch(Exception e) { // array out of bound etc
+		   //System.out.println("STH Gone wrong - while trying to move to " + posX + ":" + posY);
+		   return false;		   		   
+	   }
+   }
+   
+   public void move(int posX, int posY){
+	   if(isDeadEnd())
+		   throw new Error("Dead end - app will close - i.e agent should die");
+	   if(canMove(posX, posY)){
+		  x = posX;
+		  y = posY;
+	   } else { // can't move post action
+		   try{		   
+			   OurMap[posX][posY].setObstacle(true);
+			   System.out.println("Obstacle add " + posX + ":" + posY);
+		   } catch(Exception e){
+			   try{
+				   OurMap[posX][posY] = new Field(true);
+				   System.out.println("Obstacle init " + posX + ":" + posY);
+			   }catch(Exception e2){
+				   System.err.print(e2.getMessage());
+				   System.out.println("STH Gone terribly wrong - while moving - tried"  + posX + ":" + posY);
+			   }
+		   }
+		  	
+	   }
+	   System.out.println("Position " + x + ":" + y);	   
+   }
 
    
    @Override
@@ -48,6 +101,14 @@ public class RobotAgent extends Agent {
                   MobilityOntology.getInstance());
 
             mapa = new Sandbox(true, 0, 0); // Tu siedzą smoki
+            // initialize ourMap
+            OurMap = new Field[mapa.getWidth()][];
+            int i=0;
+            while(i < mapa.getWidth()){
+            	OurMap[i] = new Field[mapa.getHeight()];
+            	i++;
+            }
+            
             
             Random rand = new Random();
             System.out.println("1");
@@ -63,51 +124,31 @@ public class RobotAgent extends Agent {
            
          }
       });
-      
-      this.addBehaviour(new TickerBehaviour(this, 1000 * 5) {
+       
+            
+      this.addBehaviour(new TickerBehaviour(this, 1000 * 1) { // faster!
           private static final long serialVersionUID = 1L;
 
           @Override
           public void onTick() {
         	  Random go = new Random();
-        	  if(go.nextInt()%2==1){
-        		  if(go.nextInt()%2==1 && x-1>0){
-        			  if(mapa.map[x-1][y].isObstacle()){
-        			  	OurMap[x-1][y].obstacle=true;
-        		  	}else{
-        			  	OurMap[x-1][y].obstacle=false;
-        			  	x=x-1;
-        		  	}
-        		  }else{
-        			  if(x+1<100)
-        		  	if(mapa.map[x+1][y].isObstacle()){
-        			  	OurMap[x+1][y].obstacle=true;
-        		  	}else{
-        			  	OurMap[x+1][y].obstacle=false;
-        			  	x=x+1;
-        		  	}
-        	  	}
-        		  System.out.println(x+ " "+ y);
-        	  }else{
-        		  System.out.println(x+ " "+ y);
-        		  if(go.nextInt()%2==1){
-        			  if(mapa.map[x][y-1].isObstacle() && y-1>0){
-        			  	OurMap[x][y-1].obstacle=true;
-        		  	}else{
-        			  	OurMap[x][y-1].obstacle=false;
-        			  	y=y-1;
-        		  	}
-        		  }else{
-        			  if(y+1<100)
-        		  	if(mapa.map[x][y+1].isObstacle()){
-        			  	OurMap[x][y+1].obstacle=true;
-        		  	}else{
-        			  	OurMap[x][y+1].obstacle=false;
-        			  	y=y+1;
-        		  	}
-        		  }
-        		  System.out.println(x+ " "+ y);
+        	  int direction = go.nextInt()%4; // 0 top, 1 right, 2 bottom, 3 left    
+        	  switch(direction){
+        	  	case 0:
+        	  		move(x,y+1);
+        	  		break;
+        	  	case 1:
+        	  		move(x+1,y);
+        	  		break;
+        	  	case 2:
+        	  		move(x,y-1);
+        	  		break;
+        	  	case 3:
+        	  		move(x-1,y);
+        	  		break;	
         	  }
+        	  
+        	 
         	  
         	  /*
              ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
