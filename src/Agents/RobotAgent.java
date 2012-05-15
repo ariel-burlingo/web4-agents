@@ -1,6 +1,6 @@
 package Agents;
-import java.util.Random;
 
+import java.util.Random;
 import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.OntologyException;
@@ -29,8 +29,12 @@ public class RobotAgent extends Agent {
    private static final long serialVersionUID = 1L;
    public Sandbox mapa;
    public Field OurMap[][];// = new Field[mapa.getWidth()][mapa.getHeight()];
-   public int x=0;
-   public int y=0;
+   public int x=1;
+   public int y=2;
+   public boolean wyjscie=true;
+   public AID user;
+   public AID[] tempAgents;   
+   public String tmp;
    
    public boolean isDeadEnd(){
 	   try{
@@ -89,10 +93,9 @@ public class RobotAgent extends Agent {
    
    @Override
    protected void setup(){
-       System.out.println("1");
        this.addBehaviour(new OneShotBehaviour(this) {
          private static final long serialVersionUID = 1L;
-         
+        
          @Override
          public void action() {
             getContentManager().registerLanguage(new SLCodec(),
@@ -111,23 +114,55 @@ public class RobotAgent extends Agent {
             
             
             Random rand = new Random();
-            System.out.println("1");
+
            x = Math.abs(rand.nextInt())%mapa.getWidth();
            y = Math.abs(rand.nextInt())%mapa.getHeight();
-           System.out.println("2");
+
            System.out.println(mapa.map[0][0].isObstacle());
            while(mapa.map[x][y].isObstacle()){
-        	   System.out.println("3");
+
         	   x = Math.abs(rand.nextInt())%mapa.getWidth();
                y = Math.abs(rand.nextInt())%mapa.getHeight();	
            }
            
          }
       });
-       
-            
-      this.addBehaviour(new TickerBehaviour(this, 1000 * 1) { // faster!
-          private static final long serialVersionUID = 1L;
+
+       this.addBehaviour(new CyclicBehaviour(this) {
+           private static final long serialVersionUID = 1L;
+
+           @Override
+           public void action() {
+        	   
+        	   if(wyjscie){
+        		
+        		   ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                   msg.setConversationId("inform");
+                   msg.addReceiver(new AID("SA", AID.ISLOCALNAME));
+                   //convert tablicy na string
+                   String str = mapa.getHeight()+" "+mapa.getWidth()+" ";
+                   for(int i=0;i<mapa.getHeight();i++){
+                	   str+="R";
+                   
+                	   for(int j=0;j<mapa.getWidth();j++){
+                		   
+                		   if(mapa.map[j][i].isObstacle())
+                		   {
+                			   str+=""+1;
+                		   } else {
+                			   str+=""+0;
+                		   }   
+                	   }
+                   }   
+                   //koniec convertu tablicy
+                   msg.setContent(str);
+                   send(msg);
+
+        	   }
+    	   }
+        });
+
+      this.addBehaviour(new TickerBehaviour(this, 1000 * 1) {
 
           @Override
           public void onTick() {
@@ -157,7 +192,7 @@ public class RobotAgent extends Agent {
              msg.setContent("spam, spam, spam");
              send(msg);
             */
-             
+            
           }
        });
    }
