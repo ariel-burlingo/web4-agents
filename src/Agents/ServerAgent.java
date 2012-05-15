@@ -26,6 +26,7 @@ public class ServerAgent extends Agent {
 
    private static final long serialVersionUID = 1L;
    private String dane;
+   public Field OurMap[][];
    @Override
    protected void setup() {
       this.addBehaviour(new OneShotBehaviour(this) {
@@ -54,9 +55,30 @@ public class ServerAgent extends Agent {
              
              if (rec != null && rec.getSender() != getAMS()) {
             	if(rec.getPerformative()==ACLMessage.INFORM){
-                    if (rec.getConversationId() != null && rec.getConversationId()=="request")
+                    if (rec.getConversationId() != null && rec.getConversationId()=="inform")
                          dane = rec.getContent();
-                    System.out.println("Otrzymalem: "+dane);
+                    
+                    //odbior całej tablicy: Begin
+                    String tab[] = dane.split(" ");
+                    String rows[] = tab[2].split("R");
+
+                    		OurMap = new Field[Integer.parseInt(tab[1])][Integer.parseInt(tab[0])];
+                    		for(int i=0; i<Integer.parseInt(tab[0]); i++){
+                    			System.out.println("");
+                    			for(int j=0; j<Integer.parseInt(tab[1]); j++){
+                    				if(rows[i+1].charAt(j)=='1'){
+                    					OurMap[j][i]= new Field(true);
+                    					System.out.print("OurMap["+j+"]["+i+"]=true ");
+                    				}
+                    				
+                    				if(rows[i+1].charAt(j)=='0'){
+                    					OurMap[j][i]= new Field(false);
+                    					System.out.print("OurMap["+j+"]["+i+"]=false ");
+                    				}
+                    			}
+                    		}
+                    
+                    //odbior całej tablicy: end
             		}
              	}
              }
