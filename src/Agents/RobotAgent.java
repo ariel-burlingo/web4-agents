@@ -31,7 +31,8 @@ public class RobotAgent extends Agent {
    public Field OurMap[][];// = new Field[mapa.getWidth()][mapa.getHeight()];
    public int x=1;
    public int y=2;
-   public boolean wyjscie=true;
+   public boolean wyjscie=false; //oznacza że robot znalazł wyjście (gdy true)
+   public boolean praca=true; //oznacza że robot pracuje (gdy true)
    public AID user;
    public AID[] tempAgents;   
    public String tmp;
@@ -96,6 +97,11 @@ public class RobotAgent extends Agent {
        this.addBehaviour(new OneShotBehaviour(this) {
          private static final long serialVersionUID = 1L;
         
+         /*
+          * portal edukacyjny, wykład o komunikacji pod koniec rejestracja w DF kom miedzy robotami. ALBO
+          * wspolny resource dla agentow... (blackboard).
+         */
+         
          @Override
          public void action() {
             getContentManager().registerLanguage(new SLCodec(),
@@ -111,8 +117,7 @@ public class RobotAgent extends Agent {
             	OurMap[i] = new Field[mapa.getHeight()];
             	i++;
             }
-            
-            
+
             Random rand = new Random();
 
            x = Math.abs(rand.nextInt())%mapa.getWidth();
@@ -127,6 +132,7 @@ public class RobotAgent extends Agent {
            
          }
       });
+       
 
        this.addBehaviour(new CyclicBehaviour(this) {
            private static final long serialVersionUID = 1L;
@@ -134,7 +140,7 @@ public class RobotAgent extends Agent {
            @Override
            public void action() {
         	   
-        	   if(wyjscie){
+        	   if(wyjscie && praca){
         		
         		   ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
                    msg.setConversationId("inform");
@@ -143,10 +149,10 @@ public class RobotAgent extends Agent {
                    String str = mapa.getHeight()+" "+mapa.getWidth()+" ";
                    for(int i=0;i<mapa.getHeight();i++){
                 	   str+="R";
-                   
+                	   //lol
                 	   for(int j=0;j<mapa.getWidth();j++){
                 		   
-                		   if(mapa.map[j][i].isObstacle())
+                		   if(OurMap[j][i].isObstacle())
                 		   {
                 			   str+=""+1;
                 		   } else {
@@ -161,11 +167,90 @@ public class RobotAgent extends Agent {
         	   }
     	   }
         });
+       
+       this.addBehaviour(new OneShotBehaviour(this){
 
-      this.addBehaviour(new TickerBehaviour(this, 1000 * 1) {
+		@Override
+		public void action() {
+			
+			DFAgentDescription dfd = new DFAgentDescription();
+			dfd.setName(getAID());
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType("Robot");
+			dfd.addServices(sd);
+			try {
+				DFService.register(myAgent, dfd);
+			}
+			catch (FIPAException fe) {
+			fe.printStackTrace();
+			}
+			
+		}
+    	   
+       });
+       
+       this.addBehaviour(new CyclicBehaviour(this) {
+
+		@Override
+		public void action() {
+			
+			//Określenie do kogo wysłać
+			// Update the list of agents
+			DFAgentDescription template = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType("Robot");
+			template.addServices(sd);
+			try {
+			DFAgentDescription[] result = DFService.search(myAgent, template);
+			tempAgents = new AID[result.length];
+			for (int i = 0; i < result.length; ++i) {
+			tempAgents[i] = result[i].getName();
+			    }
+			}
+			catch (FIPAException fe) {
+			fe.printStackTrace();
+			   }
+			
+			if(wyjscie && praca){
+				 praca = false;
+				 ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                 msg.setConversationId("inform");
+                 for(int i=0;i<tempAgents.length; i++)
+                 msg.addReceiver(tempAgents[i]);
+                 String str = "koniec";
+                 msg.setContent(str);
+                 send(msg);
+			}
+			
+		}
+    	   
+       });
+       
+       this.addBehaviour(new CyclicBehaviour(this) {
+           private static final long serialVersionUID = 1L;
+
+           @Override
+           public void action() {
+              ACLMessage rec = receive(MessageTemplate
+                    .MatchPerformative(ACLMessage.QUERY_IF));
+              rec = receive();
+              
+              if (rec != null && rec.getSender() != getAMS()) {
+             	if(rec.getPerformative()==ACLMessage.INFORM){
+                     if (rec.getConversationId() != null && rec.getConversationId()=="spam"){
+                    	 if(rec.getContent()=="koniec")
+                    		 praca = false;
+                     }
+             		}
+              	}
+              }
+       });
+
+      this.addBehaviour(new TickerBehaviour(this, 500 * 1) {
 
           @Override
           public void onTick() {
+        	  if(praca){
         	  Random go = new Random();
         	  int direction = go.nextInt()%4; // 0 top, 1 right, 2 bottom, 3 left    
         	  switch(direction){
@@ -182,17 +267,10 @@ public class RobotAgent extends Agent {
         	  		move(x-1,y);
         	  		break;	
         	  }
+        	  wyjscie = true;
+        	  }
         	  
-        	 
-        	  
-        	  /*
-             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-             msg.setConversationId("request");
-             msg.addReceiver(new AID("RB", AID.ISLOCALNAME));
-             msg.setContent("spam, spam, spam");
-             send(msg);
-            */
-            
+
           }
        });
    }
