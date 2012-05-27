@@ -52,6 +52,18 @@ public class RobotAgent extends Agent {
 	   return false;
    }
    
+   public boolean isExit(){
+	   if(mapa.map[x][y].isExit()){ 
+		   return true;
+	   } else {
+		   return false;
+	   }
+   }
+   
+   public void afterExitFound(){
+	   // implement post logic here
+   }
+   
    public boolean canMove(int posX, int posY){
 	   try{
 		   if(mapa.map[posX][posY].isObstacle()){
@@ -73,6 +85,12 @@ public class RobotAgent extends Agent {
 	   if(canMove(posX, posY)){
 		  x = posX;
 		  y = posY;
+		  if(this.isExit()){
+			  praca = false;
+			  wyjscie = true;
+			  // go to declaration and use if needed for any post action
+			  this.afterExitFound();
+		  }
 	   } else { // can't move post action
 		   try{		   
 			   OurMap[posX][posY].setObstacle(true);
