@@ -62,6 +62,7 @@ public class RobotAgent extends Agent {
    
    public void afterExitFound(){
 	   // implement post logic here
+	   System.out.println("ZNALAZŁEM WYJŚCIE!!!!");
    }
    
    public boolean canMove(int posX, int posY){
@@ -86,7 +87,7 @@ public class RobotAgent extends Agent {
 		  x = posX;
 		  y = posY;
 		  if(this.isExit()){
-			  praca = false;
+			  //praca = false;
 			  wyjscie = true;
 			  // go to declaration and use if needed for any post action
 			  this.afterExitFound();
@@ -169,13 +170,18 @@ public class RobotAgent extends Agent {
                 	   str+="R";
                 	   //lol
                 	   for(int j=0;j<mapa.getWidth();j++){
-                		   
-                		   if(OurMap[j][i].isObstacle())
-                		   {
-                			   str+=""+1;
-                		   } else {
+                		   try{
+            			   if(OurMap[j][i].isObstacle())
+            			   {
+            				   str+=""+1;
+            			   } else if(OurMap[j][i].isExit()){
+            				   str+=""+2;
+            			   } else {
+            				   str+=""+0;
+            			   }
+                		   } catch( Exception e ){
                 			   str+=""+0;
-                		   }   
+                		   }
                 	   }
                    }   
                    //koniec convertu tablicy
@@ -206,7 +212,7 @@ public class RobotAgent extends Agent {
 		}
     	   
        });
-       
+       //wysyłanie wiadomości o znalezieniu miejsca
        this.addBehaviour(new CyclicBehaviour(this) {
 
 		@Override
@@ -232,7 +238,7 @@ public class RobotAgent extends Agent {
 			if(wyjscie && praca){
 				 praca = false;
 				 ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-                 msg.setConversationId("inform");
+                 msg.setConversationId("koniec");
                  for(int i=0;i<tempAgents.length; i++)
                  msg.addReceiver(tempAgents[i]);
                  String str = "koniec";
@@ -243,7 +249,7 @@ public class RobotAgent extends Agent {
 		}
     	   
        });
-       
+       // odbieranie wiadomosci o końcu
        this.addBehaviour(new CyclicBehaviour(this) {
            private static final long serialVersionUID = 1L;
 
@@ -255,7 +261,7 @@ public class RobotAgent extends Agent {
               
               if (rec != null && rec.getSender() != getAMS()) {
              	if(rec.getPerformative()==ACLMessage.INFORM){
-                     if (rec.getConversationId() != null && rec.getConversationId()=="spam"){
+                     if (rec.getConversationId() != null && rec.getConversationId()=="koniec"){
                     	 if(rec.getContent()=="koniec")
                     		 praca = false;
                      }
@@ -264,7 +270,7 @@ public class RobotAgent extends Agent {
               }
        });
 
-      this.addBehaviour(new TickerBehaviour(this, 500 * 1) {
+      this.addBehaviour(new TickerBehaviour(this, 10 * 1) {
 
           @Override
           public void onTick() {
