@@ -24,7 +24,7 @@ public class Sandbox {
 			//return this;
 		} else {*/
 			if(fromFile){
-				this.loadMap("sample.map");
+				this.loadMap("small.map");
 				//return this;
 			} else {
 				this.width = width;

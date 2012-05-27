@@ -81,6 +81,11 @@ public class ServerAgent extends Agent {
                     					OurMap[j][i].setAsExit();
                     					System.out.print("E");
                     				}
+                    				
+                    				if(rows[i+1].charAt(j)=='3'){
+                    					OurMap[j][i]= new Field(false);
+                    					System.out.print("?");
+                    				}
                     			}
                     		}
                     

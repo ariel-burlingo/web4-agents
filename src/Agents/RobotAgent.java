@@ -86,8 +86,10 @@ public class RobotAgent extends Agent {
 	   if(canMove(posX, posY)){
 		  x = posX;
 		  y = posY;
+		  OurMap[x][y] = new Field(false);
 		  if(this.isExit()){
 			  //praca = false;
+			  OurMap[posX][posY].setAsExit();
 			  wyjscie = true;
 			  // go to declaration and use if needed for any post action
 			  this.afterExitFound();
@@ -180,7 +182,7 @@ public class RobotAgent extends Agent {
             				   str+=""+0;
             			   }
                 		   } catch( Exception e ){
-                			   str+=""+0;
+                			   str+=""+3;
                 		   }
                 	   }
                    }   
@@ -201,6 +203,7 @@ public class RobotAgent extends Agent {
 			dfd.setName(getAID());
 			ServiceDescription sd = new ServiceDescription();
 			sd.setType("Robot");
+			sd.setName(getName());
 			dfd.addServices(sd);
 			try {
 				DFService.register(myAgent, dfd);
@@ -262,7 +265,6 @@ public class RobotAgent extends Agent {
               if (rec != null && rec.getSender() != getAMS()) {
              	if(rec.getPerformative()==ACLMessage.INFORM){
                      if (rec.getConversationId() != null && rec.getConversationId()=="koniec"){
-                    	 if(rec.getContent()=="koniec")
                     		 praca = false;
                      }
              		}
@@ -270,7 +272,7 @@ public class RobotAgent extends Agent {
               }
        });
 
-      this.addBehaviour(new TickerBehaviour(this, 10 * 1) {
+      this.addBehaviour(new TickerBehaviour(this, 500 * 1) {
 
           @Override
           public void onTick() {
