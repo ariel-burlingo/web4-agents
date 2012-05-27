@@ -74,10 +74,16 @@ public class Sandbox {
             	while(characterIdx < this.width){
             		char data = strLine.charAt(characterIdx);
             		switch(data){
-            	  		case 'X':  this.map[characterIdx][i] = new Field(true);
-            	  		break;
-            	  		case '.': this.map[characterIdx][i] = new Field(false);
-            	  		break;
+            	  		case 'X':  
+            	  			this.map[characterIdx][i] = new Field(true);
+            	  			break;
+            	  		case '.': 
+            	  			this.map[characterIdx][i] = new Field(false);
+            	  			break;
+            	  		case 'e': 
+            	  			this.map[characterIdx][i] = new Field(false);
+            	  			this.map[characterIdx][i].setAsExit();            	  			
+            	  			break;
             		}
             		characterIdx++;
             		System.out.print(data);
