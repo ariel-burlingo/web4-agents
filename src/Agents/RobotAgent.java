@@ -71,11 +71,6 @@ public class RobotAgent extends Agent {
 	   if(isDeadEnd())
 		   throw new Error("Dead end - app will close - i.e agent should die");
 	   if(canMove(posX, posY)){
-		   try{		   
-			   	OurMap[posX][posY].setObstacle(false);
-		   	} catch(Exception e){ // create new field
-		   		OurMap[posX][posY] = new Field();
-		   	}
 		  x = posX;
 		  y = posY;
 	   } else { // can't move post action
@@ -156,16 +151,13 @@ public class RobotAgent extends Agent {
                 	   str+="R";
                 	   //lol
                 	   for(int j=0;j<mapa.getWidth();j++){
-                		   try{
-                			   if(OurMap[j][i].isObstacle())
-                			   {
-                				   str+=""+1;
-                			   } else {
-                				   str+=""+0;
-                			   }
-                		   } catch(Exception e){ // if field not initialised, return 0 - no obstacle - unknown
+                		   
+                		   if(OurMap[j][i].isObstacle())
+                		   {
+                			   str+=""+1;
+                		   } else {
                 			   str+=""+0;
-                		   }
+                		   }   
                 	   }
                    }   
                    //koniec convertu tablicy
@@ -275,7 +267,6 @@ public class RobotAgent extends Agent {
         	  		move(x-1,y);
         	  		break;	
         	  }
-        	  wyjscie = true;
         	  }
         	  
 

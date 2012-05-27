@@ -39,7 +39,7 @@ public class ServerAgent extends Agent {
             getContentManager().registerOntology(
                   MobilityOntology.getInstance());
             
-            Sandbox mapa = new Sandbox(true, 0, 0);
+          //  Sandbox mapa = new Sandbox(true, 0, 0);
           //  mapa.loadMap("");
          }
       });
@@ -68,12 +68,18 @@ public class ServerAgent extends Agent {
                     			for(int j=0; j<Integer.parseInt(tab[1]); j++){
                     				if(rows[i+1].charAt(j)=='1'){
                     					OurMap[j][i]= new Field(true);
-                    					System.out.print("OurMap["+j+"]["+i+"]=true ");
+                    					System.out.print("X");
                     				}
                     				
                     				if(rows[i+1].charAt(j)=='0'){
                     					OurMap[j][i]= new Field(false);
-                    					System.out.print("OurMap["+j+"]["+i+"]=false ");
+                    					System.out.print(".");
+                    				}
+                    				
+                    				if(rows[i+1].charAt(j)=='2'){
+                    					OurMap[j][i]= new Field(false);
+                    					OurMap[j][i].setAsExit();
+                    					System.out.print("E");
                     				}
                     			}
                     		}
